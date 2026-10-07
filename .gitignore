@@ -1,0 +1,5 @@
+# For THIS public kit repo only: keeps models and eval outputs from being pushed publicly.
+# When you copy the kit into your own (private) project, delete these lines
+# so your models DO get committed there.
+models/
+tests/out/

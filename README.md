@@ -17,7 +17,7 @@ instead of trusting its (mostly SysML v1) training data.
 | `tests/eval-prompts.md` | you | 7 prompts to measure changes |
 
 ## Setup
-1. Copy everything into the root of your SysML project folder.
+1. Copy everything into the root of your own SysML project folder — **not** a clone of this public repo, or your models could end up pushed publicly. Your models go in `models/` (the agent is told to write there). This repo's `.gitignore` excludes `models/` as a safety net — delete that line in your own project's copy, or your models won't be committed there.
 2. In `.opencode/agents/sysml.md`, set `model:` to your exact provider/model id (e.g. `rog/<id shown in LM Studio>`).
 3. In LM Studio, load Gemma 4 26B A4B with **context length ≥ 65536**. Always-loaded overhead from this kit is about 8K tokens on top of OpenCode's own prompt; each example file read adds 0.3–1.5K.
 4. Make sure the model's context/output limits in your OpenCode provider config match what LM Studio loaded.
@@ -25,6 +25,7 @@ instead of trusting its (mostly SysML v1) training data.
 
 ## Optional: syntax validator (recommended, still offline)
 `npm install -g sysml-validate` (or `.\setup.ps1 -InstallValidator`). The agent detects it and runs a fix loop.
+Run it yourself with `sysml-validate models` — not on the project root, which would also check the 100 reference examples.
 It parsed all 100 official examples with zero errors and flags v1 constructs, but it is a third-party tool and
 slightly more lenient than the OMG grammar (e.g. it accepts `part def A : B;`, which the grammar rejects).
 

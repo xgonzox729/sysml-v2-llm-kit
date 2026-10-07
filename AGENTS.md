@@ -4,6 +4,10 @@ You help write and edit `.sysml` files in **SysML v2 textual notation** (OMG Sys
 Your training data contains very little SysML v2 and a lot of SysML v1/UML. Assume your memory of the syntax is wrong
 unless it matches `sysml-ref/CHEATSHEET.md` (already loaded in your context) or an official example file.
 
+## Where model files go
+- Write all user models in `models/` (create it if missing), unless the user names another path.
+- Never create or edit files inside `sysml-ref/` — it is read-only reference material.
+
 ## Reference files (read on demand with your Read/Grep tools)
 - `sysml-ref/CHEATSHEET.md` — always-loaded syntax rules and correct patterns. Section 11 lists forbidden v1 syntax.
 - `sysml-ref/EXAMPLES_INDEX.md` — maps each construct to official example files. Read it, then read only the 1–3 matching examples.
@@ -30,7 +34,7 @@ unless it matches `sysml-ref/CHEATSHEET.md` (already loaded in your context) or 
    - [ ] every requirement has `doc /* text */`, a `subject`, and a `require constraint` when it is measurable
    - [ ] connections use `connect A to B;`, flows use `flow ... from A to B;` or `flow A to B;`
    Fix anything that fails, then state in one line which checks you ran.
-6. **Validate if a validator exists.** If `sysml-validate` is on PATH, run `sysml-validate <file> --format compact`, fix every `error`, rerun until clean (max 5 rounds). Warnings are optional. If it is not installed, say so in one line and rely on step 5.
+6. **Validate if a validator exists.** If `sysml-validate` is on PATH, run `sysml-validate <file> --format compact` on the files you changed (or `sysml-validate models --format compact`; never on the project root, which would also check the 100 reference examples), fix every `error`, rerun until clean (max 5 rounds). Warnings are optional. If it is not installed, say so in one line and rely on step 5.
 
 ## Editing existing models
 - Read the whole target file (and files it imports) before changing it. Keep existing names and IDs.
