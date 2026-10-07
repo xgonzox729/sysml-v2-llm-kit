@@ -33,3 +33,7 @@ slightly more lenient than the OMG grammar (e.g. it accepts `part def A : B;`, w
 - **Thinking mode**: Gemma 4 enables it via `<|think|>` at the start of the system prompt. If LM Studio exposes a thinking/reasoning toggle for this model, try it on, especially for state machines.
 - **Quantization**: higher-bit quants (Q5/Q6) tend to hold rare syntax better than Q4 if VRAM allows the 64K context.
 - `.\setup.ps1` refreshes examples and grammar from the official repo.
+
+## License
+MIT (see `LICENSE`), except `sysml-ref/examples/` and `sysml-ref/grammar/`, which are OMG SysML v2 Release
+material under the Eclipse Public License 2.0.
