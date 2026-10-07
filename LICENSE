@@ -19,10 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Third-party content: the files in `sysml-ref/examples/` and `sysml-ref/grammar/`
-are from the OMG SysML v2 Release repository
-(https://github.com/Systems-Modeling/SysML-v2-Release) and are licensed under the
-Eclipse Public License 2.0, not MIT. See the LICENSE-EPL-2.0.txt file in each folder.
