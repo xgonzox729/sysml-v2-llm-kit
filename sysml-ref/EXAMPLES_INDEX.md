@@ -25,8 +25,11 @@ Each file is small (300–1500 tokens). **Read only the 1–3 files that match y
 | variability `variation`/`variant` | 36 |
 | dependencies, allocation | 37, 38 |
 | metadata, filtering, language extension, views | 39–42 |
+| electrical wiring: connectors, pins, pinouts, wires, harnesses, power/data nets | `sysml-ref/WIRING.md` first, then `sysml-ref/wiring/avionics.sysml` |
 
 Also: `sysml-ref/GoldExample_BatteryCharger.sysml` — one validated model combining most constructs (electrical domain).
+
+Wiring (not OMG; from the SysML v2 VS Code extension, MIT): `sysml-ref/WIRING.md` (guide), `sysml-ref/wiring/avionics.sysml` (example), `sysml-ref/wiring/Wiring.sysml` (library source).
 
 ## Files
 

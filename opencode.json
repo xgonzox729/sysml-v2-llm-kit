@@ -1,4 +1,12 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": ["sysml-ref/CHEATSHEET.md"]
+  "instructions": ["sysml-ref/CHEATSHEET.md"],
+  "permission": {
+    "edit": {
+      "*": "allow",
+      "sysml-ref/**": "deny",
+      "tools/**": "ask",
+      ".opencode/**": "ask"
+    }
+  }
 }

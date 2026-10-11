@@ -13,6 +13,7 @@ unless it matches `sysml-ref/CHEATSHEET.md` (already loaded in your context) or 
 - `sysml-ref/EXAMPLES_INDEX.md` — maps each construct to official example files. Read it, then read only the 1–3 matching examples.
 - `sysml-ref/examples/**.sysml` — 100 official OMG examples. Copy their syntax exactly.
 - `sysml-ref/GoldExample_BatteryCharger.sysml` — one validated end-to-end model.
+- `sysml-ref/WIRING.md` — how to model connectors, pins, wires and harnesses with the extension's `Wiring` library; example in `sysml-ref/wiring/avionics.sysml`.
 - `sysml-ref/grammar/SysML-textual-bnf.kebnf` — the official grammar. NEVER read it whole (it is huge). Grep it for one rule name or keyword, e.g. `grep -n "^TransitionUsage" -A12`.
 
 ## Workflow for every modeling request
@@ -21,20 +22,24 @@ unless it matches `sysml-ref/CHEATSHEET.md` (already loaded in your context) or 
    - structure: part defs, their parts, attributes (with units), ports and what flows through them;
    - behavior: actions and their order, or states and their transitions (source → trigger → guard → effect → target);
    - requirements: id, text, subject, the measurable condition, and which part satisfies it.
-3. **Look up before writing.** For each construct type in the plan that you have not already used in this session, check the cheat sheet; if it is not there, open the matching official example from the index.
+3. **Look up before writing.** For each construct type in the plan that you have not already used in this session, check the cheat sheet; if it is not there, open the matching official example from the index. For electrical wiring (connectors, pins, wires, harnesses, pinouts) read `sysml-ref/WIRING.md` first.
 4. **Write the file.** Definitions (`part def`, `port def`, …) first, then usages and configurations, then `satisfy`/`allocate`. One top-level `package` per file, named like the file.
 5. **Verify** (do not skip) — re-read what you wrote and check each item:
    - [ ] every statement ends with `;` or a `{ }` body, never both; braces balanced
    - [ ] no SysML v1 / UML words: block, value, property, valueType, flowPort, stereotypes `<< >>`, `->` arrows, `[guard]/effect`
    - [ ] definitions specialize with `:>` (never `:`); usages are typed with `:`; overrides use `:>>` or `redefines`
-   - [ ] every name used is declared in this file or imported (`private import X::*;`); library types come from `ScalarValues`, `ISQ`, `SI`
+   - [ ] every name used is declared in this file or imported (`private import X::*;`); library types come from `ScalarValues`, `ISQ`, `SI` (and `Wiring` for wiring models)
    - [ ] numbers with units use `value [unit]` (e.g. `12 [V]`); booleans use `and/or/not`, never `&& || !`
    - [ ] names with spaces use single quotes; strings use double quotes
    - [ ] constraint bodies end with an expression and no `;`
    - [ ] every requirement has `doc /* text */`, a `subject`, and a `require constraint` when it is measurable
    - [ ] connections use `connect A to B;`, flows use `flow ... from A to B;` or `flow A to B;`
    Fix anything that fails, then state in one line which checks you ran.
-6. **Validate if a validator exists.** If `sysml-validate` is on PATH, run `sysml-validate <file> --format compact` on the files you changed (or `sysml-validate models --format compact`; never on the project root, which would also check the 100 reference examples), fix every `error`, rerun until clean (max 5 rounds). Warnings are optional. If it is not installed, say so in one line and rely on step 5.
+6. **Validate.** Use the first checker that is available; never run one on the project root (it would also check the reference examples):
+   1. **SysML v2 extension checker** (preferred: full parser, name resolution, Wiring checks). In OpenCode call the `sysml_check` tool; otherwise run `node tools/sysml-check.mjs <changed files>` (or `node tools/sysml-check.mjs models`). Exit code 3 means the extension is not installed: go to 2.
+   2. `sysml-validate <changed files> --format compact`, if it is on PATH. It does not know the `Wiring` library.
+   3. Neither available: say so in one line and rely on step 5.
+   Fix every `error` and rerun until clean (max 5 rounds). Warnings are optional, but fix wiring warnings that point at a real modeling mistake.
 
 ## Editing existing models
 - Read the whole target file (and files it imports) before changing it. Keep existing names and IDs.

@@ -182,6 +182,7 @@ package InterfaceDemo {
 - Port directions live on the **features inside** the port def (`in item`, `out item`, `inout`). The mating side uses the conjugate `~FuelPort`.
 - `connect A to B;` — always `to`, never `->` or `,`.
 - `flow ... from X to Y;` (in a usage) or `flow X to Y;` (in an interface/connection def body).
+- Electrical wiring (connectors, pins, wires, harnesses, pinouts): read `sysml-ref/WIRING.md` before writing.
 
 ## 5. Actions (activity-like behavior)
 
