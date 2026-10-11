@@ -25,11 +25,20 @@ Each file is small (300–1500 tokens). **Read only the 1–3 files that match y
 | variability `variation`/`variant` | 36 |
 | dependencies, allocation | 37, 38 |
 | metadata, filtering, language extension, views | 39–42 |
-| electrical wiring: connectors, pins, pinouts, wires, harnesses, power/data nets | `sysml-ref/WIRING.md` first, then `sysml-ref/wiring/avionics.sysml` |
+| electrical wiring: connectors, pins, pinouts, wires, harnesses, power/data nets | `sysml-ref/WIRING.md` first, then `sysml-ref/extension/examples/wiring/avionics.sysml` |
+| engineering values: units (mA, µA, kΩ, mAh), power trees, tolerances, analyses, SPICE | `sysml-ref/EXTENSION.md` first, then the guide chapter it names |
+| requirements that pass/fail with a margin (`require constraint` + `satisfy`) | `sysml-ref/EXTENSION.md`, `sysml-ref/extension/example/sensor-node/model/node-requirements.sysml` |
+| firmware tasks, budgets, message formats (`@Encoding`), registers, generated code, traceability | `sysml-ref/EXTENSION.md`, then `node-software.sysml`, `node-icd.sysml` |
+| a whole multi-file system (project layout) | `sysml-ref/extension/example/sensor-node/model/` (start with `node-architecture.sysml`) |
 
 Also: `sysml-ref/GoldExample_BatteryCharger.sysml` — one validated model combining most constructs (electrical domain).
 
-Wiring (not OMG; from the SysML v2 VS Code extension, MIT): `sysml-ref/WIRING.md` (guide), `sysml-ref/wiring/avionics.sysml` (example), `sysml-ref/wiring/Wiring.sysml` (library source).
+Extension material (not OMG; from the SysML v2 VS Code extension, MIT — see `sysml-ref/extension/README.md`):
+- `sysml-ref/EXTENSION.md` — engineering libraries, requirement verification, code and document generation (start here).
+- `sysml-ref/WIRING.md` — harnesses and pinouts.
+- `sysml-ref/extension/guide/` — the extension's modeling guide; `A-cheat-sheet.md`, `C-extension-libraries.md`, `F-troubleshooting.md`.
+- `sysml-ref/extension/example/sensor-node/model/` — the EnviroNode, a complete multi-file system.
+- `sysml-ref/extension/examples/` — small models (simulation, software, wiring); `sysml-ref/extension/library/` — library sources.
 
 ## Files
 

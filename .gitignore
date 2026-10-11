@@ -3,3 +3,5 @@
 # so your models DO get committed there.
 models/
 tests/out/
+docs/model/
+generated/

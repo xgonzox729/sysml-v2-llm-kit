@@ -25,16 +25,8 @@ standard library package Wiring {
     private import MeasurementReferences::*;
     private import SI::*;
 
-    /* Units commonly used in wiring that the SI library does not predefine. */
-    attribute <mV> millivolt : ElectricPotentialUnit { :>> unitConversion: ConversionByPrefix { :>> prefix = milli; :>> referenceUnit = V; } }
-    attribute <kV> kilovolt : ElectricPotentialUnit { :>> unitConversion: ConversionByPrefix { :>> prefix = kilo; :>> referenceUnit = V; } }
-    attribute <mA> milliampere : ElectricCurrentUnit { :>> unitConversion: ConversionByPrefix { :>> prefix = milli; :>> referenceUnit = A; } }
-    attribute <'μA'> microampere : ElectricCurrentUnit { :>> unitConversion: ConversionByPrefix { :>> prefix = micro; :>> referenceUnit = A; } }
-    attribute <'mΩ'> milliohm : ResistanceUnit { :>> unitConversion: ConversionByPrefix { :>> prefix = milli; :>> referenceUnit = 'Ω'; } }
-    attribute <'kΩ'> kiloohm : ResistanceUnit { :>> unitConversion: ConversionByPrefix { :>> prefix = kilo; :>> referenceUnit = 'Ω'; } }
-    attribute <mW> milliwatt : PowerUnit { :>> unitConversion: ConversionByPrefix { :>> prefix = milli; :>> referenceUnit = W; } }
-    attribute <kW> kilowatt : PowerUnit { :>> unitConversion: ConversionByPrefix { :>> prefix = kilo; :>> referenceUnit = W; } }
-    attribute <cm> centimetre : LengthUnit { :>> unitConversion: ConversionByPrefix { :>> prefix = centi; :>> referenceUnit = m; } }
+    /* Units commonly used in wiring: the engineering units (mV, mA, kΩ, ...) plus a few more. */
+    public import EngineeringUnits::*;
     attribute <'mm²'> 'millimetre squared' : AreaUnit = mm^2;
     attribute <ft> foot : LengthUnit { :>> unitConversion: ConversionByConvention { :>> referenceUnit = m; :>> conversionFactor = 0.3048; } }
     attribute <'in'> inch : LengthUnit { :>> unitConversion: ConversionByConvention { :>> referenceUnit = m; :>> conversionFactor = 0.0254; } }

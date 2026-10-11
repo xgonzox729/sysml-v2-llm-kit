@@ -5,7 +5,7 @@ Score each file: **syntax** (0 = errors, 1 = no errors from the checker) and **c
 Use it to compare models (record the exact model id and settings with each run), and re-run after any change to
 the prompt files, temperature, thinking mode, or quantization.
 
-| Model id | Settings | Syntax (/8) | Content (/16) | Notes |
+| Model id | Settings | Syntax (/10) | Content (/20) | Notes |
 |---|---|---|---|---|
 | | | | | |
 
@@ -17,5 +17,7 @@ the prompt files, temperature, thinking mode, or quantization.
 6. **Variants** — "Add a variation for the battery: 3S 5000 mAh or 4S 4000 mAh, and two drone configurations selecting each. Add a constraint that the 4S variant requires the high-KV-rated ESC variant."
 7. **Repair** — paste a v1-flavored snippet (e.g. `block Motor { value kv : Real; }` with `connector a -> b;`) and ask: "Convert this to valid SysML v2."
 8. **Wiring** — "Create `PowerHarness.sysml`: a 28 V power supply (10 A max) feeds a display that draws 3 A and accepts 22–32.2 V with at most 1 V drop, through harness W1 with a 4 m power wire and a 4 m ground return. Choose a wire gauge that passes the checks." (Content: uses the `Wiring` library per `sysml-ref/WIRING.md`, an installation `part`, and no `wiring-*` errors.)
+9. **Verified requirement** — "Create `sensor-parts.sysml` and `sensor-requirements.sysml`: a sensor node powered by a 2400 mAh Li-ion cell through a 3.3 V LDO, with an MCU drawing 4 mA active, 1.5 µA asleep, 1 % duty cycle. Add requirement PWR-1: the node shall run at least 3 years, and verify it." (Content: uses `Electronics` parts per `sysml-ref/EXTENSION.md`, a typed subject, `require constraint`, `satisfy`, and reports the margin from `sysml_verify` — not a made-up number.)
+10. **Documents** — on the result of prompt 9: "Generate the system documents and tell me what is missing for a design review." (Content: runs `/sysml-docs` or the same steps, writes the five files to `docs/model/`, and lists real gaps such as missing `doc` or traceability without inventing text.)
 
-Tip: `node tools/sysml-check.mjs tests/out/<model>` scores syntax for one model's whole set at once (put prompt 2–6 follow-ups in the same `Drone.sysml` or the same folder so imports resolve). Without the extension, `sysml-validate tests/out/<model> --format compact` works for prompts 1–7.
+Tip: `node tools/sysml-check.mjs tests/out/<model>` scores syntax for one model's whole set at once (keep prompt 2–6 follow-ups in the same `Drone.sysml` or the same folder so imports resolve), and `node tools/sysml.mjs verify tests/out/<model>` shows the requirement results for prompts 5 and 9. Without the extension, `sysml-validate tests/out/<model> --format compact` works for prompts 1–7.

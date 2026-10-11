@@ -5,6 +5,9 @@
     "edit": {
       "*": "allow",
       "sysml-ref/**": "deny",
+      "docs/model/**": "deny",
+      "generated/**": "deny",
+      "generated/*_actions.c": "allow",
       "tools/**": "ask",
       ".opencode/**": "ask"
     }

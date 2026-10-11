@@ -183,6 +183,7 @@ package InterfaceDemo {
 - `connect A to B;` — always `to`, never `->` or `,`.
 - `flow ... from X to Y;` (in a usage) or `flow X to Y;` (in an interface/connection def body).
 - Electrical wiring (connectors, pins, wires, harnesses, pinouts): read `sysml-ref/WIRING.md` before writing.
+- Engineering values, power, tolerances, firmware, verified requirements, code/doc generation: read `sysml-ref/EXTENSION.md`.
 
 ## 5. Actions (activity-like behavior)
 
@@ -462,6 +463,7 @@ package MiscDemo {
 - Boolean operators are words: `and` `or` `not` `xor` `implies`. **No `&&`, `||`, `!`.**
 - Equality `==`, inequality `!=`. Comparison `< > <= >=`. Power `^` or `**`.
 - Conditional: `if cond ? a else b`.
+- Units that are not plain identifiers are quoted: `1.5 ['µA']`, `100 ['kΩ']` (`EngineeringUnits`); `[mA]`, `[ms]` need no quotes.
 - Sequence literal: `(a, b, c)`. Index: `seq#(i)`. Collection ops: `sum(x)`, `size(x)`, `x->forAll { in i : T; ... }`.
 - Strings use double quotes `"text"`; names use single quotes `'My Name'`.
 
@@ -482,6 +484,7 @@ package MiscDemo {
 | `import X.*;` / `import X::*` (no `;`) | `private import X::*;` |
 | `&&` `\|\|` `!` | `and` `or` `not` |
 | `x = 5` inside an action to change a value | `assign x := 5;` |
+| `attribute capacity = 2 [Ah];` to set an inherited value | `:>> capacity = 2 [Ah];` (the first declares a new attribute) |
 | `"Fuel Station"` as a name | `'Fuel Station'` |
 | `value 4.2 V` / `4.2[volt]` | `4.2 [V]` (SI symbol) |
 | `int`, `float`, `double`, `bool` | `Integer`, `Real`, `Boolean` (ScalarValues) |

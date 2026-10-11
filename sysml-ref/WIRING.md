@@ -6,7 +6,7 @@ splices, power/ground nets or data buses (CAN, Ethernet, ARINC 429, RS-422/485/2
 - `Wiring` is **not** part of the OMG standard library. It ships with the SysML v2 VS Code extension
   (github.com/xgonzox729/sysmlextension), whose checker (`tools/sysml-check.mjs`) resolves it and runs the
   electrical checks below. `sysml-validate` does not know it and reports `Wiring::*` names as unresolved.
-- Library source (read-only copy): `sysml-ref/wiring/Wiring.sysml`. Full example: `sysml-ref/wiring/avionics.sysml`
+- Library source (read-only copy): `sysml-ref/extension/library/Wiring.sysml`. Full example: `sysml-ref/extension/examples/wiring/avionics.sysml`
   (28 V supply, flight computer, display, CAN bus, Ethernet, one harness). Never copy `Wiring.sysml` into `models/`.
 
 ## Four steps
@@ -64,8 +64,8 @@ package Example {
 - **Parts/ports**: `Pin` (`pinId`, `maxCurrent`, `voltageRating`, `contactSize`), `Connector` (`gender` =
   `ConnectorGender::plug`/`receptacle`, `partNumber`), `Wire` (`length`, `gauge` `AWG::AWG0`…`AWG30` or
   `crossSection`, `material`, `color`, `wireId`, `ampacity`), `Splice` (connect each wire to its `node`),
-  `Harness`, `TwistedPair`, `CableShield`.
-- **Units**: SI plus `mV`, `kV`, `mA`, `mΩ`, `kΩ`, `mW`, `kW`, `cm`, `ft`, `'in'`, `'mm²'`. Quote non-ASCII units:
+  `Harness`, `CableShield`, and `TwistedPair` (`part TP1 : TwistedPair { :>> wires = (W1007, W1008); }` — the pair is checked).
+- **Units**: SI plus the `EngineeringUnits` library (`mV`, `mA`, `['µA']`, `['mΩ']`, `['kΩ']`, `mW`, `cm`, … see `sysml-ref/EXTENSION.md`), and `ft`, `'in'`, `'mm²'`. Quote non-ASCII units:
   `1.5 ['mm²']`. On a pin named like a unit (pin `A`), `[A]` still means amperes.
 
 ## Rules that trip models up
@@ -80,7 +80,7 @@ package Example {
 `wiring-signal-mismatch` (different signal kinds on one net), `wiring-polarity` (swapped differential legs),
 `wiring-bitrate`, `wiring-multiple-sources`, `wiring-no-source`, `wiring-unconnected` (warning),
 `wiring-voltage-range`, `wiring-voltage-rating`, `wiring-mate-gender`, `wiring-mate-unmatched` (warning),
-`wiring-duplicate-pin`, `wiring-ampacity` (message suggests a gauge), `wiring-pin-current`,
+`wiring-duplicate-pin`, `wiring-twisted-pair` (warning: a pair must twist the + and − legs of one link), `wiring-ampacity` (message suggests a gauge), `wiring-pin-current`,
 `wiring-source-capacity` (warning), `wiring-voltage-drop` (message names the wire to enlarge).
 Fix the model, not the check: e.g. for `wiring-ampacity` pick the suggested gauge; for `wiring-voltage-drop`
 enlarge the named wire or shorten it.

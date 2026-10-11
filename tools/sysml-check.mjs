@@ -1,36 +1,31 @@
 #!/usr/bin/env node
-// Headless SysML v2 checker. Drives the language server of the SysML v2 VS Code extension
-// (https://github.com/xgonzox729/sysmlextension) over stdio and prints its diagnostics:
-// syntax errors, unresolved names and the Wiring library's electrical checks.
-// Zero dependencies; Node 18+.
+// Checks .sysml/.kerml files with the SysML v2 VS Code extension (https://github.com/xgonzox729/sysmlextension):
+// syntax, name resolution, units and the extension's engineering checks (wiring, electronics, software, requirements).
+// Uses the extension's sysml-sim CLI (`sysml-sim check`); for older extension versions without the CLI it drives the
+// language server over stdio instead. Zero dependencies; Node 18+ (20+ for the CLI).
 //
-//   node tools/sysml-check.mjs <file-or-dir>... [--server <main.cjs>] [--root <dir>] [--errors-only] [--timeout <s>]
+//   node tools/sysml-check.mjs <file-or-dir>... [--extension <dir>] [--errors-only] [--allow-reference]
 //   node tools/sysml-check.mjs --probe
 //
-// Exit codes: 0 no errors, 1 errors found, 2 usage, 3 extension server not found, 4 timeout.
-import { spawn } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { homedir } from 'node:os';
+// Exit codes: 0 no errors, 1 errors found, 2 usage, 3 extension not found, 4 timeout (language-server mode).
+import { spawn, spawnSync } from 'node:child_process';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-
-const EXTENSION_ID = 'xgonzox729.sysml-vscode';
-const SERVER_REL = path.join('out', 'language', 'main.cjs');
-const EDITOR_DIRS = ['.vscode', '.vscode-insiders', '.vscode-oss', '.cursor', '.windsurf', '.vscode-server'];
-const KIT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+import { findExtension, isReservedTarget, notFoundMessage } from './lib/find-extension.mjs';
 
 const USAGE = `usage: node tools/sysml-check.mjs <file-or-dir>... [options]
        node tools/sysml-check.mjs --probe
 
-Checks .sysml/.kerml files with the SysML v2 VS Code extension's language server.
+Checks .sysml/.kerml files with the SysML v2 VS Code extension.
 
 options:
-  --server <path>   the extension's out/language/main.cjs (or set SYSML_LSP_SERVER)
-  --root <dir>      workspace folder used to resolve cross-file references
-                    (default: the common directory of the targets)
-  --errors-only     print errors only, not warnings
-  --timeout <s>     give up after this many seconds (default 120)
-  --probe           only print where the extension server was found`;
+  --extension <dir>  the extension folder (or set SYSML_EXTENSION); --server <main.cjs> also works
+  --errors-only      print errors only, not warnings
+  --allow-reference  allow checking files in sysml-ref/ or the whole project root
+  --root <dir>       (language-server mode) workspace folder for cross-file references
+  --timeout <s>      (language-server mode) give up after this many seconds (default 120)
+  --probe            only print what was found`;
 
 function fail(code, message) {
     console.error(message);
@@ -38,15 +33,16 @@ function fail(code, message) {
 }
 
 // ---------- arguments ----------
-const opts = { targets: [], server: undefined, root: undefined, errorsOnly: false, probe: false, timeout: 120 };
+const opts = { targets: [], extension: undefined, root: undefined, errorsOnly: false, probe: false, timeout: 120, allowReference: false };
 const argv = process.argv.slice(2);
 for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const value = () => argv[++i] ?? fail(2, `${a} needs a value\n\n${USAGE}`);
-    if (a === '--server') opts.server = value();
+    if (a === '--extension' || a === '--server') opts.extension = value();
     else if (a === '--root') opts.root = value();
     else if (a === '--timeout') opts.timeout = Number(value());
     else if (a === '--errors-only') opts.errorsOnly = true;
+    else if (a === '--allow-reference') opts.allowReference = true;
     else if (a === '--probe') opts.probe = true;
     else if (a === '-h' || a === '--help') { console.log(USAGE); process.exit(0); }
     else if (a.startsWith('--')) fail(2, `unknown option ${a}\n\n${USAGE}`);
@@ -55,56 +51,32 @@ for (let i = 0; i < argv.length; i++) {
 if (!opts.probe && opts.targets.length === 0) fail(2, USAGE);
 if (!(opts.timeout > 0)) fail(2, '--timeout must be a positive number of seconds');
 
-// ---------- locating the server ----------
-function compareVersions(a, b) {
-    const pa = a.split(/[.-]/).map(Number), pb = b.split(/[.-]/).map(Number);
-    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-        const d = (pa[i] || 0) - (pb[i] || 0);
-        if (d) return d;
-    }
-    return 0;
-}
-
-function findServer() {
-    const looked = [];
-    const check = p => { looked.push(p); return existsSync(p) ? p : undefined; };
-    if (opts.server) return { server: check(path.resolve(opts.server)), looked };
-    if (process.env.SYSML_LSP_SERVER) return { server: check(path.resolve(process.env.SYSML_LSP_SERVER)), looked };
-    const installed = [];
-    for (const editor of EDITOR_DIRS) {
-        const dir = path.join(homedir(), editor, 'extensions');
-        looked.push(path.join(dir, `${EXTENSION_ID}-*`, SERVER_REL));
-        let entries = [];
-        try { entries = readdirSync(dir); } catch { continue; }
-        for (const e of entries) {
-            if (!e.toLowerCase().startsWith(EXTENSION_ID + '-')) continue;
-            const p = path.join(dir, e, SERVER_REL);
-            if (existsSync(p)) installed.push({ p, version: e.slice(EXTENSION_ID.length + 1) });
-        }
-    }
-    if (installed.length) {
-        installed.sort((x, y) => compareVersions(y.version, x.version));
-        return { server: installed[0].p, looked };
-    }
-    // A source checkout next to the kit, after `npm run build`.
-    for (const name of ['sysmlextension', 'sysMLextension', 'SysMLExtension']) {
-        const s = check(path.join(KIT_ROOT, '..', name, SERVER_REL));
-        if (s) return { server: s, looked };
-    }
-    return { server: undefined, looked };
-}
-
-const { server, looked } = findServer();
-if (!server) {
-    fail(3, `SysML v2 extension server not found. Looked in:\n${looked.map(l => '  ' + l).join('\n')}\n` +
-        `Install the extension (VS Code: Extensions: Install from VSIX...), or build a clone of\n` +
-        `https://github.com/xgonzox729/sysmlextension next to this kit (npm ci && npm run build),\n` +
-        `or pass --server <path to out/language/main.cjs>.`);
-}
+const ext = findExtension(opts.extension);
+if (!ext.root) fail(3, notFoundMessage(ext.looked));
+const useCli = !!ext.cli && Number(process.versions.node.split('.')[0]) >= 20;
 if (opts.probe) {
-    console.log(server);
+    console.log(useCli ? ext.cli : ext.server);
     process.exit(0);
 }
+if (!opts.allowReference) {
+    for (const t of opts.targets) {
+        if (isReservedTarget(t)) fail(2, `refusing to check ${t}: that would include the reference examples in sysml-ref/. Pass your model files or the models/ folder.`);
+    }
+}
+
+// ---------- sysml-sim check ----------
+if (useCli) {
+    const r = spawnSync(process.execPath, [ext.cli, 'check', ...opts.targets], { encoding: 'utf8', maxBuffer: 64 << 20 });
+    const lines = (r.stdout ?? '').split('\n').filter(Boolean);
+    for (const line of lines) {
+        if (opts.errorsOnly && /:\d+:\d+: (warning|info|hint): /.test(line)) continue;
+        console.log(line);
+    }
+    if (r.stderr) process.stderr.write(r.stderr);
+    process.exit(r.status ?? 2);
+}
+if (!ext.server) fail(3, `The SysML v2 extension at ${ext.root} has no language server (out/language/main.cjs).`);
+const server = ext.server;
 
 // ---------- collecting targets ----------
 const SKIP_DIRS = new Set(['node_modules', 'out', 'dist']);
